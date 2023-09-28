@@ -1,4 +1,11 @@
-# Working with Python in EE 367
+# Assignment 1
+
+## Learning Goals
+In this homework, you will learn about and experiment with pinhole cameras. This will help you understand the
+very basics of how to form an image with a camera-like instrument. Most of all, we hope you have fun tinkering
+with your pinhole camera! You will also learn how to load images in Python, take a 2D Fourier transform, edit and
+compose images in the Fourier domain, and plot and save these images. This exercise will help you get up to speed
+with basic image processing tasks in Python.
 
 ## Setup
 ### miniconda
