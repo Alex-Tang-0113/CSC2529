@@ -7,12 +7,12 @@ Computational imaging systems have a wide range of applications in consumer elec
 Topics include:
 
 - Human visual perception
-Digital cameras and ISPs
-Denoising, deconvolution, and other inverse problems in imaging
-Convolutional neural networks for solving inverse problems
-Proximal gradient methods / formal optimization for solving inverse problems
-High dynamic range imaging
-Light field imaging
-Time-of-flight imaging, non-line-of-sight imaging
-End-to-end optimization of optics and image processing
+- Digital cameras and ISPs
+- Denoising, deconvolution, and other inverse problems in imaging
+- Convolutional neural networks for solving inverse problems
+- Proximal gradient methods / formal optimization for solving inverse problems
+- High dynamic range imaging
+- Light field imaging
+- Time-of-flight imaging, non-line-of-sight imaging
+- End-to-end optimization of optics and image processing
 ... other interesting topics.
