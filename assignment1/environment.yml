@@ -1,0 +1,19 @@
+name: csc2529
+channels:
+  - defaults
+  - pytorch
+dependencies:
+  - python=3.8
+  - notebook
+  - numpy
+  - scipy
+  - pip
+  - tqdm
+  - matplotlib
+  - scikit-image
+  - pytorch=1.12
+  - torchvision
+  - pip:
+      - pypher
+      - opencv-python
+      - ipywidgets
