@@ -21,5 +21,11 @@ def bilateral2d(img, radius, sigma, sigmaIntensity):
             # compute weights, sum the weighted intensity.
             # Don't forget to normalize by the sum of the weights used.
 
-            out[y, x] = 0. # TODO: Replace with your own code
+            intensity_kernel = np.zeros(tuple(filtSize))
+            # intensity_kernel[filtSize[0]//2, filtSize[1]//2] = 1
+            intensity_kernel = np.exp(-(imgPad[y: y+2*pad+1, x: x+2*pad+1] - centerVal)**2/(2*sigmaIntensity**2))
+
+            kernel = spatialKernel * intensity_kernel
+
+            out[y, x] = (kernel * imgPad[y: y+2*pad+1, x: x+2*pad+1]).sum()
     return out

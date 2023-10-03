@@ -58,21 +58,6 @@ def demosaic(img):
     B[1::2, 1::2] = img[1::2, 1::2]
     G[1::2, 0::2] = img[1::2, 0::2]
     G[0::2, 1::2] = img[1::2, 0::2]
-
-    # G at R
-    R_up = np.roll(R, -2, axis = 0)
-    R_down = np.roll(R, 2, axis = 0)
-    R_right = np.roll(R, -2, axis = 1)
-    R_left = np.roll(R, 2, axis = 1)
-    Gra_R[0::2, 0::2] = R - (R_up + R_down + R_right + R_left)/4
-
-    # G at B
-    B_up = np.roll(B, -2, axis = 0)
-    B_down = np.roll(B, 2, axis = 0)
-    B_right = np.roll(B, -2, axis = 1)
-    B_left = np.roll(B, 2, axis = 1)
-    Gra_B[1::2, 1::2] = B - (B_up + B_down + B_right + B_left)/4
-
     #print(R.shape)
     
     xx = np.arange(0, H, 1)
@@ -151,21 +136,35 @@ def hq_interpolation(img):
     G[1::2, 0::2] = img[1::2, 0::2]
     G[0::2, 1::2] = img[1::2, 0::2]
 
-    G = convolve(G, GaR_filter, range(2, H-2, 2), range(2, W-2, 2), img)
-    G = convolve(G, GaB_filter, range(3, H-2, 2), range(3, W-2, 2), img)
+    # G = convolve(G, GaR_filter, range(2, H-2, 2), range(2, W-2, 2), img)
+    # G = convolve(G, GaB_filter, range(3, H-2, 2), range(3, W-2, 2), img)
 
-    R = convolve(R, RaB_filter, range(3, H-2, 2), range(3, W-2, 2), img)
-    R = convolve(R, RaG_BrRc_filter, range(3, H-2, 2), range(2, W-2, 2), img)
-    R = convolve(R, RaG_RrBc_filter, range(2, H-2, 2), range(3, W-2, 2), img)
+    G[0::2, 0::2] = convolve2d(img, GaR_filter, boundary='symm',mode='same')[0::2, 0::2]
+    G[1::2, 1::2] = convolve2d(img, GaB_filter, boundary='symm',mode='same')[1::2, 1::2]
+
+    # R = convolve(R, RaB_filter, range(3, H-2, 2), range(3, W-2, 2), img)
+    # R = convolve(R, RaG_BrRc_filter, range(3, H-2, 2), range(2, W-2, 2), img)
+    # R = convolve(R, RaG_RrBc_filter, range(2, H-2, 2), range(3, W-2, 2), img)
+
+    R[1::2, 1::2] = convolve2d(img, RaB_filter, boundary='symm',mode='same')[1::2, 1::2]
+    R[1::2, 0::2] = convolve2d(img, RaG_BrRc_filter, boundary='symm',mode='same')[1::2, 0::2]
+    R[0::2, 1::2] = convolve2d(img, RaG_RrBc_filter, boundary='symm',mode='same')[0::2, 1::2]
     
-    B = convolve(R, BaR_filter, range(2, H-2, 2), range(2, W-2, 2), img)
-    B = convolve(R, BaG_BrRc_filter, range(3, H-2, 2), range(2, W-2, 2), img)
-    B = convolve(R, BaG_RrBc_filter, range(2, H-2, 2), range(3, W-2, 2), img)
+    # B = convolve(B, BaR_filter, range(2, H-2, 2), range(2, W-2, 2), img)
+    # B = convolve(B, BaG_BrRc_filter, range(3, H-2, 2), range(2, W-2, 2), img)
+    # B = convolve(B, BaG_RrBc_filter, range(2, H-2, 2), range(3, W-2, 2), img)
+
+    B[0::2, 0::2] = convolve2d(img, BaR_filter, boundary='symm',mode='same')[0::2, 0::2]
+    B[1::2, 0::2] = convolve2d(img, BaG_BrRc_filter, boundary='symm',mode='same')[1::2, 0::2]
+    B[0::2, 1::2] = convolve2d(img, BaG_RrBc_filter, boundary='symm',mode='same')[0::2, 1::2]
+
 
     dmosai = (np.stack((R, G, B), axis = 2))#.astype(int)
 
     dmosai[np.where(dmosai > 1)] = 1
     dmosai[np.where(dmosai < 0)] = 0
+
+    # dmosai = (dmosai - min)/(max - min)
     # print(dmosai)
 
     return dmosai
@@ -192,7 +191,7 @@ def low_pass_filter(img, size):
 
 
 if __name__ == '__main__':
-    '''dmosai = demosaic(raw_noisy)
+    dmosai = demosaic(raw_noisy)
     q1 = gamma_correction(dmosai)
     print("psnr for q1:", PSNR(original, q1))
     image.imsave('q1.png', q1)
@@ -201,11 +200,10 @@ if __name__ == '__main__':
     q2 = gamma_correction(filtered)
     psnr = PSNR(original, q2)
     print("psnr for q2:", psnr)
-
-    image.imsave('q2.png', q2)'''
+    image.imsave('q2.png', q2)
 
     hq_dmosai = hq_interpolation(raw_noisy)
     q3 = gamma_correction(hq_dmosai)
-    print("psnr for q1:", PSNR(original, q3))
+    print("psnr for q3:", PSNR(original, q3))
     image.imsave('q3.png', q3)
 

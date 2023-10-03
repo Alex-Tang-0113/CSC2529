@@ -7,6 +7,7 @@ from skimage.filters import gaussian
 from scipy.ndimage import median_filter
 from scipy.signal import convolve2d
 from pdb import set_trace
+from matplotlib import image
 
 from bilateral import bilateral2d
 from fspecial import fspecial_gaussian_2d
@@ -19,21 +20,25 @@ noisy = io.imread('night_downsampled_noisy_sigma_0.0781.png').astype(float)/255
 filtered = {}
 
 # Choose standard deviations:
-sigmas = [1, 2, 3]
+sigmas = [1, 2,  3]
 for sigma in sigmas:
-    filtSize = 2*sigma + 1
+    filtSize = int(2*sigma + 1)
 
     # Gaussian filter
     out = np.zeros_like(noisy)
     for channel in [0, 1, 2]:
-        out[..., channel] = np.zeros_like(noisy[..., 0]) # TODO your code here
+        #out[..., channel] = np.zeros_like(noisy[..., 0]) # TODO your code here
+        kernel = fspecial_gaussian_2d((filtSize, filtSize), sigma)
+        out[..., channel] = convolve2d(noisy[..., channel], kernel, boundary='symm',mode='same')
     filtered[f'gaussian_{sigma}'] = out
+
 
     # Median filter
     out = np.zeros_like(noisy)
     for channel in [0, 1, 2]:
-        out[..., channel] = np.zeros_like(noisy[..., 0]) # TODO your code here
-    filtered[f'median_{filtSize}'] = out
+        # out[..., channel] = np.zeros_like(noisy[..., 0]) # TODO your code here
+        out[..., channel] = median_filter(noisy[..., channel], (filtSize, filtSize) )
+    filtered[f'median_{(filtSize)}'] = out
 
     # Bilateral Filter
     sigmaIntensity = 0.25
@@ -71,18 +76,18 @@ ax[0,1].axis('off')
 for r, sigma in enumerate(sigmas):
     # Plot Gaussian
     ax[r+1,0].imshow(filtered[f'gaussian_{sigma}'])
-    ax[r+1,0].set_title(f'Gaussian (sigma={sigma})')
+    ax[r+1,0].set_title(f'Gaussian (sigma={sigma}, filter size = {filtSize})')
     ax[r+1,0].axis('off')
 
     # Plot Median
-    filtSize = 2 * sigma + 1
+    filtSize = int(2 * sigma + 1)
     ax[r+1,1].imshow(filtered[f'median_{filtSize}'])
     ax[r+1,1].set_title(f'Median (filter size = {filtSize})')
     ax[r+1,1].axis('off')
 
     # Plot Bilateral
     ax[r+1,2].imshow(filtered[f'bilateral_{sigma}'])
-    ax[r+1,2].set_title(f'Bilateral filter (sigmaSpatial={sigma}, sigmaNlm={nlmSigma})')
+    ax[r+1,2].set_title(f'Bilateral filter (sigmaSpatial={sigma}, sigmaIntensity={sigmaIntensity}, filter size = {filtSize})')
     ax[r+1,2].axis('off')
 
     # Plot Non-local means
@@ -92,3 +97,29 @@ for r, sigma in enumerate(sigmas):
 ax[0,2].remove()
 ax[0,3].remove()
 fig.savefig('task3_denoising.png', bbox_inches='tight')
+
+
+# for saving other two parameters of q1
+for sigma in [1.75, 2.25]:
+    out = np.zeros_like(noisy)
+    for channel in [0, 1, 2]:
+        #out[..., channel] = np.zeros_like(noisy[..., 0]) # TODO your code here
+        kernel = fspecial_gaussian_2d((filtSize, filtSize), sigma)
+        out[..., channel] = convolve2d(noisy[..., channel], kernel, boundary='symm',mode='same')
+    image.imsave(f"Gaussian_{sigma}.png", out)
+
+
+for kernel_size in [4, 6]:
+    for channel in [0, 1, 2]:
+        # out[..., channel] = np.zeros_like(noisy[..., 0]) # TODO your code here
+        out[..., channel] = median_filter(noisy[..., channel], (kernel_size, kernel_size) )
+    image.imsave(f'median_{(kernel_size)}.png', out)
+
+for sigmaIntensity in [0.1, 1]:
+    bilateral = np.zeros_like(noisy)
+    for channel in [0, 1, 2]:
+        bilateral[..., channel] = bilateral2d(noisy[..., channel],
+                                              radius=int(sigma),
+                                              sigma=2,
+                                              sigmaIntensity=sigmaIntensity)
+    image.imsave(f'Bilateral filter (sigmaSpatial={2}, sigmaIntensity={sigmaIntensity}, filter size = {filtSize}).png', out)
